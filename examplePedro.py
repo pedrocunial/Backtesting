@@ -1,4 +1,5 @@
-from backtesting import evaluateHist
+from backtesting import evaluateHist, evaluate
+from marketdata import MarketData
 from strategy import Strategy
 from order import Order
 
@@ -59,4 +60,14 @@ class PedroStrategy(Strategy):
         return orders
 
 
-print(evaluateHist(PedroStrategy(), '^BVSP.csv'))
+class PedroIntr(Strategy):
+    
+
+
+def evaluateIntr(strategy, files):
+    return evaluate(strategy, MarketData.INTR, files)
+
+
+print(evaluateHist(PedroStrategy(), {'BVSP': '^BVSP.csv'}))
+print(evaluateIntr(PedroIntr(), {'PETR3': 'dataPedro/ADR.csv',
+                                 'USDBRL': 'USDBRL.csv'}))
