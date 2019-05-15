@@ -49,18 +49,20 @@ class MarketData():
           
         self.events[date.toordinal()].append(Event(instrument, date, type, price, quantity))
 
-  def loadBBGIntr(self, file, instrument, type = Event.CANDLE):
+  def loadBBGIntr(self, file, instrument, type = Event.CANDLE, separator=';',
+                  date_format='%d/%m/%Y %H:%M'):
 
     with open(file,'r') as file:
       data = file.read()
 
+
     events = data.split('\n')
     events = events[1:]
     for event in events:      
-      cols = event.split(';')
+      cols = event.split(separator)
       if len(cols) == 5:
 
-        date = datetime.strptime(cols[0], '%d/%m/%Y %H:%M:%S')
+        date = datetime.strptime(cols[0], date_format)
         price = (float(cols[1].replace(',','.')), 
                  float(cols[3].replace(',','.')), 
                  float(cols[4].replace(',','.')), 
