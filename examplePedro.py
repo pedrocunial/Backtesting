@@ -1,4 +1,4 @@
-from backtesting import evaluateHist, evaluate
+from backtesting import evaluateHist, evaluate, evaluateIntr
 from marketdata import MarketData
 from strategy import Strategy
 from order import Order
@@ -86,10 +86,6 @@ class PedroIntr(Strategy):
         else:
             raise ValueError('Event instrument not accepted')
         return []
-
-
-def evaluateIntr(strategy, files):
-    return evaluate(strategy, MarketData.INTR, files)
 
 
 print(evaluateHist(SAR(), {'IBOV': '^BVSP.csv'}))
