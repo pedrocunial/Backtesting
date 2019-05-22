@@ -34,5 +34,5 @@ def evaluateTick(strategy, files):
 def evaluateHist(strategy, files):
   return evaluate(strategy, MarketData.HIST, files)
 
-def evaluateIntr(strategy, files, has_config=False):
+def evaluateIntr(strategy, files, *, has_config=False):
   return evaluate(strategy, MarketData.INTR, files, has_config=has_config)
