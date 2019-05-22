@@ -16,8 +16,12 @@ def evaluate(strategy, type, files):
     elif type == MarketData.HIST:
       data.loadYAHOOHist(file_data, instrument)
     elif type == MarketData.INTR:
-      data.loadBBGIntr(file_data[0], instrument, separator=file_data[1],
-                       date_format=file_data[2])
+      if type(file_data) is list:
+        data.loadBBGIntr(file_data[0], instrument, separator=file_data[1],
+                         date_format=file_data[2])
+      else:
+        data.loadBBGIntr(file_data, instrument)
+
 
   data.run(ts)
 
