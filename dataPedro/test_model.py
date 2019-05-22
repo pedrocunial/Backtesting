@@ -13,3 +13,4 @@ X_test, y_test = stack_data(test_data), create_y(test_data)
 model = load_model()
 
 predict = model.predict(X_test)
+print(predict)

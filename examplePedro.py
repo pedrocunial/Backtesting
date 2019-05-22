@@ -3,6 +3,10 @@ from marketdata import MarketData
 from strategy import Strategy
 from order import Order
 
+from dataPedro.train_model import load_model
+
+import numpy as np
+
 
 PETR = 'PETR3.csv'
 STOCK = 'stock'
@@ -67,6 +71,34 @@ class SAR(Strategy):
         return orders
 
 
+class PedroStrategy(Strategy):
+
+    def __init__(self, model=load_model('dataPedro/model')):
+        self.model = model
+        self.stack = []
+        self.buying = 0
+
+    def act(self, goal, instrument):
+        if self.buying == 0:
+            return [Order(instrument, goal, 0)]
+        elif self.buying == goal:
+            return []
+        else:
+            return [Order(instrument, goal, 0), Order(instrument, goal, 0)]
+
+    def push(self, event):
+        self.stack.append([event.price[3]])
+        if not self.is_stacking:
+            predict = self.model.predict(np.array([self.stack[-10:]]))
+            return self.act(-1 if predict < event.price[3] else 1,
+                            event.instrument)
+        return []
+
+    @property
+    def is_stacking(self):
+        return len(self.stack) < 10
+
+
 class PedroIntr(Strategy):
 
     def __init__(self, stock=None, coin=None, petr=None,
@@ -125,6 +157,7 @@ class PedroIntr(Strategy):
 
 
 print(evaluateHist(SAR(), {'IBOV': '^BVSP.csv'}))
+print(evaluateHist(PedroStrategy(), {'IBOV': 'dataPedro/test_data.csv'}))
 print(evaluateIntr(PedroIntr(), {
     STOCK: [
         'dataPedro/ADR.csv',
@@ -141,4 +174,4 @@ print(evaluateIntr(PedroIntr(), {
         ';',
         '%d/%m/%Y %H:%M:%S'
     ],
-}))
+}, has_config=True))

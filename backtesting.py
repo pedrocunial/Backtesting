@@ -2,7 +2,7 @@ from marketdata import MarketData
 from tradingsystem import TradingSystem
 from strategy import Strategy
 
-def evaluate(strategy, type, files):
+def evaluate(strategy, type, files, *, has_config=False):
   strategy.clear()
   data = MarketData()
 
@@ -16,7 +16,7 @@ def evaluate(strategy, type, files):
     elif type == MarketData.HIST:
       data.loadYAHOOHist(file_data, instrument)
     elif type == MarketData.INTR:
-      if type(file_data) is list:
+      if has_config:
         data.loadBBGIntr(file_data[0], instrument, separator=file_data[1],
                          date_format=file_data[2])
       else:
@@ -34,5 +34,5 @@ def evaluateTick(strategy, files):
 def evaluateHist(strategy, files):
   return evaluate(strategy, MarketData.HIST, files)
 
-def evaluateIntr(strategy, files):
-  return evaluate(strategy, MarketData.INTR, files)
+def evaluateIntr(strategy, files, has_config=False):
+  return evaluate(strategy, MarketData.INTR, files, has_config=has_config)
