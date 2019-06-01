@@ -6,21 +6,22 @@ def evaluate(strategy, type, files, *, has_config=False):
   strategy.clear()
   data = MarketData()
 
-  ts = TradingSystem()  
-  
+  ts = TradingSystem()
+
   for instrument, file_data in files.items():
     ts.createBook(instrument)
-    ts.subscribe(instrument, strategy)
-    if type == MarketData.TICK:
-      data.loadBBGTick(file_data, instrument)
-    elif type == MarketData.HIST:
-      data.loadYAHOOHist(file_data, instrument)
-    elif type == MarketData.INTR:
-      if has_config:
-        data.loadBBGIntr(file_data[0], instrument, separator=file_data[1],
-                         date_format=file_data[2])
-      else:
-        data.loadBBGIntr(file_data, instrument)
+    if file_data is not None:
+      ts.subscribe(instrument, strategy)
+      if type == MarketData.TICK:
+        data.loadBBGTick(file_data, instrument)
+      elif type == MarketData.HIST:
+        data.loadYAHOOHist(file_data, instrument)
+      elif type == MarketData.INTR:
+        if has_config:
+          data.loadBBGIntr(file_data[0], instrument, separator=file_data[1],
+                           date_format=file_data[2])
+        else:
+          data.loadBBGIntr(file_data, instrument)
 
 
   data.run(ts)

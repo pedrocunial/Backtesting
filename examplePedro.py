@@ -111,42 +111,67 @@ class PedroIntr(Strategy):
         self.ti = a / self.F
         self.buying = 0
 
-    def pushStock(self, event):
-        self.stock = event.price[2]
-        return []
-
     def pushCoin(self, event):
         self.coin = event.price[2]
-        if self.stock is None or self.petr is None:
+        if self.petr is None:
             return []
-        petr = self.stock * self.coin / (self.F * self.ti)
+        pbr = (self.petr / self.coin) * (self.F * self.ti)
         order = None
-        if petr < self.petr:
-            order = Order(event.instrument, 1, 0)
+        if pbr < 2 * self.petr:
+            order = [Order(COIN, 1, (self.petr + pbr) / 2),
+                     Order(PETR, -1, self.coin)]
             buy = True
-        elif petr > self.petr:
-            order = Order(event.instrument, -1, 0)
+        elif pbr > 2 * self.petr:
+            order = [Order(COIN, -1, self.coin),
+                     Order(PETR, 1, (self.petr + pbr) / 2)]
             buy = False
 
         result = []
         if order is not None:
             if self.buying == 0:
-                result = [order]
+                result = order
             elif self.buying == -1:
                 if buy:
-                    result = [order, order]
+                    result = 2 * order
             else:
                 if not buy:
-                    result = [order, order]
+                    result = 2 * order
         return result
 
     def pushPetr(self, event):
         self.petr = event.price[2]
-        return []
+        if self.coin is None:
+            return []
+        pbr = self.petr / self.coin * (self.F * self.ti)
+        order = None
+        if pbr < self.petr:
+            order = [Order(PETR, -1, (self.petr + pbr) / 2),
+                     Order(COIN, 1, self.coin)]
+            buy = True
+        elif pbr > self.petr:
+            order = [Order(COIN, -1, self.coin),
+                     Order(PETR, 1, (self.petr + pbr) / 2)]
+            buy = False
+
+        result = []
+        if order is not None:
+            if self.buying == 0:
+                result = order
+            elif self.buying == -1:
+                if buy:
+                    result = 2 * order
+            else:
+                if not buy:
+                    result = 2 * order
+        return result
+
+    def fill(self, instrument, price, quantity, status):
+        super().fill(instrument, price, quantity, status)
 
     def push(self, event):
         if event.instrument == STOCK:
-            return self.pushStock(event)
+            print(STOCK)
+            return []
         elif event.instrument == COIN:
             return self.pushCoin(event)
         elif event.instrument == PETR:
@@ -159,11 +184,7 @@ class PedroIntr(Strategy):
 print(evaluateHist(SAR(), {'IBOV': '^BVSP.csv'}))
 print(evaluateHist(PedroStrategy(), {'IBOV': 'dataPedro/test_data.csv'}))
 print(evaluateIntr(PedroIntr(), {
-    STOCK: [
-        'dataPedro/ADR.csv',
-        ',',
-        '%d/%m/%y %H:%M'
-    ],
+    STOCK: None,
     COIN: [
         'USDBRL.csv',
         ';',
